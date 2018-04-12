@@ -2,10 +2,12 @@
 module Circles where
 
 import Data.List (isPrefixOf)
+import Text.Printf (printf)
 
 data Point = Point { x :: Int, y :: Int } deriving Show
 data BoundingBox = BBox { lowerLeft :: Point, upperRight :: Point } deriving Show
 data Circle = Circle { radius :: Int, center :: Point } deriving Show
+data Arc = Arc { baseCircle :: Circle, start0Angle :: Float, endAngle :: Float } deriving Show
 data Line = Line { from :: Point, to :: Point } deriving Show
 newtype Dot = Dot Circle
 
@@ -23,6 +25,17 @@ data DrawableBox = forall a. Drawable a => DB a
 instance Drawable Circle where
   draw (Circle r (Point x y)) = "<circle cx=\"" ++ show x ++ "\" cy=\"" ++ show y ++ "\" r=\"" ++ show r ++ "\" stroke=\"black\" stroke-width=\"2\" fill=\"white\" />"
   bbox (Circle r (Point x y)) = BBox (Point (x - r) (y - r)) (Point (x + r) (y + r))
+
+instance Drawable Arc where
+  bbox = bbox . baseCircle
+  draw (Arc circ s e) = "<path d=\"" ++ moveTo ++ " A " ++ rs ++ " 0 " ++ bigFlag ++ " 1 " ++ endCoords ++ "\" stroke=\"black\" stroke-width=\"2\" fill=\"white\" />"
+    where xpos c a = fromIntegral c + cos a * fromIntegral r
+          ypos c a = fromIntegral c + sin a * fromIntegral r
+          r = fromIntegral $ radius circ
+          moveTo = "M " ++ printf "%0.2f" (xpos (x $ center circ) s) ++ " " ++ printf "%0.2f" (ypos (y $ center circ) s) 
+          rs = show r ++ " " ++ show r
+          bigFlag = if abs (e - s) >= 180 then "1" else "0"
+          endCoords = printf "%0.2f" (xpos (x $ center circ) e) ++ " " ++ printf "%0.2f" (ypos (y $ center circ) e)
 
 instance Drawable Dot where
   draw (Dot c) = replace "white" "black" $ draw c
@@ -52,6 +65,9 @@ circle r p = DB $ Circle r p
 
 dot :: Int -> Point -> DrawableBox
 dot r p = DB $ Dot $ Circle r p
+
+arc :: Int -> Point -> Float -> Float -> DrawableBox
+arc r p start end = DB $ Arc (Circle r p) start end
 
 line :: Point -> Point -> DrawableBox
 line p1 p2 = DB $ Line p1 p2
