@@ -1,10 +1,10 @@
 name:                CircleWriter
 version:             0.1.0.0
-github:              "githubuser/CircleWriter"
+github:              "Tayacan/CircleWriter"
 license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2018 Author name here"
+author:              "Maya Saietz"
+maintainer:          "mayasaietz@gmail.com"
+copyright:           "2018 Maya Saietz"
 
 extra-source-files:
 - README.md
@@ -17,7 +17,7 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on Github at <https://github.com/githubuser/CircleWriter#readme>
+description:         Please see the README on Github at https://github.com/Tayacan/CircleWriter
 
 dependencies:
 - base >= 4.7 && < 5
