@@ -34,7 +34,7 @@ instance Drawable Arc where
           r = fromIntegral $ radius circ
           moveTo = "M " ++ printf "%0.2f" (xpos (x $ center circ) s) ++ " " ++ printf "%0.2f" (ypos (y $ center circ) s) 
           rs = show r ++ " " ++ show r
-          bigFlag = if abs (e - s) >= 180 then "1" else "0"
+          bigFlag = if e - s >= pi || s > e && s - e <= pi then "1" else "0"
           endCoords = printf "%0.2f" (xpos (x $ center circ) e) ++ " " ++ printf "%0.2f" (ypos (y $ center circ) e)
 
 instance Drawable Dot where
