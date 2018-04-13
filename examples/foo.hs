@@ -1,11 +1,9 @@
 import Circles
 
 main :: IO ()
-main = writeFile "examples/foo.svg" foo
+main = writeFile "examples/foo.svg" $ svg $ foo ++ bar
 
-foo :: String
-foo = svg $
-      [ circle 100 (Point 0 0)
+foo = [ circle 100 (Point 0 0)
       , arc 90 (Point 0 0) (pi/2) pi
       , circle 80 (Point 0 0)
       , arc 70 (Point 0 0) (pi/2) 0
@@ -25,4 +23,13 @@ foo = svg $
       , circle 5 (Point 60 0)
       , circle 5 (Point (-40) 0)
       , dot 10 (Point 0 0)
+      ]
+
+bar = [ circle 100 (Point 250 0)
+      , triangle 200 (Point 250 0) (pi/2)
+      , line (Point 250 0) (Point 250 115)
+      , line (Point 250 0) (Point 352 (-58))
+      , line (Point 250 0) (Point 149 (-58))
+      , triangle 200 (Point 250 0) (-pi/2)
+      , circle 58 (Point 250 0)
       ]

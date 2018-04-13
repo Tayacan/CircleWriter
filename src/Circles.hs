@@ -1,11 +1,12 @@
 {-# LANGUAGE ExistentialQuantification, FlexibleInstances #-}
 module Circles
-( circle, arc, dot, line
-, Point (..)
+( circle, arc, dot, line, triangle
+, Point (..), Circle (..)
 , svg
+, pointOnCircle
 ) where
 
-import Data.List (isPrefixOf)
+import Data.List (intersperse)
 import Text.Printf (printf)
 import SVG
 
@@ -28,13 +29,39 @@ data Line = Line
   , to :: Point
   } deriving Show
 
+data Triangle = Triangle
+  { sideLength :: Int
+  , position :: Point
+  , angle :: Float
+  } deriving Show
+
 newtype Dot = Dot Circle
 
 class Drawable a where
   draw :: a -> SvgElement
   bbox :: a -> BoundingBox
 
+pointOnCircle :: Circle -> Float -> Point
+pointOnCircle (Circle r (Point x' y')) a = Point (round x) (round y)
+  where x = fromIntegral x' + cos a * fromIntegral r
+        y = fromIntegral y' + sin a * fromIntegral r
+
 data DrawableBox = forall a. Drawable a => DB a
+
+instance Drawable Triangle where
+  draw (Triangle s (Point x y) a) = SvgElement "path" attrs
+    where attrs = [ BA $ SvgAttribute "d" path
+                  , BA $ SvgAttribute "stroke" "black"
+                  , BA $ SvgAttribute "stroke-width" (2 :: Int)
+                  , BA $ SvgAttribute "fill" "white"
+                  ]
+          path = SpacedList $ "M" : intersperse "L" (map (\(Point x' y') -> show x' ++ " " ++ show y') points) ++ ["Z"]
+          points = map (pointOnCircle (Circle (round $ fromIntegral s / sqrt 3) (Point x y))) [a, 2 * pi / 3 + a, 4 * pi / 3 + a]
+
+  bbox (Triangle s (Point x y) a) = getBBox $ map (\p -> BBox p p) points
+    where points = map (pointOnCircle (Circle (round $ 2 * height / 3) (Point x y))) [a, 2 * pi / 3 + a, 4 * pi / 3 + a]
+          height :: Float
+          height = sqrt $ fromIntegral s ** 2 - (fromIntegral s / 2) ** 2
 
 instance Drawable Circle where
   draw (Circle r (Point x y)) = SvgElement "circle" attrs
@@ -84,10 +111,13 @@ instance Drawable DrawableBox where
   draw (DB a) = draw a
   bbox (DB a) = bbox a
 
-getBBox :: Drawable a => [a] -> BoundingBox
+getBBox :: [BoundingBox] -> BoundingBox
 getBBox [] = BBox (Point 0 0) (Point 0 0)
-getBBox (d:ds) = foldl (\acc d -> extendBox acc d) (bbox d) (map bbox ds)
+getBBox (d:ds) = foldl (\acc d -> extendBox acc d) d ds
   where extendBox (BBox a b) (BBox c d) = BBox (Point (min (x a) (x c)) (min (y a) (y c))) (Point (max (x b) (x d)) (max (y b) (y d)))
+
+triangle :: Int -> Point -> Float -> DrawableBox
+triangle s p a = DB $ Triangle s p a
 
 circle :: Int -> Point -> DrawableBox
 circle r p = DB $ Circle r p
@@ -112,6 +142,6 @@ svg xs = svgStart ++ render (map draw xs) ++ svgEnd
         svgEnd   = "</svg>"
         width = right - left
         height = top - bot
-        (BBox (Point left' bot') (Point right' top')) = getBBox xs
+        (BBox (Point left' bot') (Point right' top')) = getBBox $ map bbox xs
         (left, bot, right, top) = (left' - padding, bot' - padding, right' + padding, top' + padding)
         padding = 5
