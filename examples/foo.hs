@@ -3,7 +3,7 @@ import Circles
 main :: IO ()
 main = writeFile "examples/foo.svg" foo
 
-foo :: SVG
+foo :: String
 foo = svg $
       [ circle 100 (Point 0 0)
       , arc 90 (Point 0 0) (pi/2) pi
