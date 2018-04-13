@@ -78,4 +78,6 @@ svg x = svgStart `concatSvg` draw x `concatSvg` svgEnd
         svgEnd   = "</svg>"
         width = right - left
         height = top - bot
-        (BBox (Point left bot) (Point right top)) = bbox x
+        (BBox (Point left' bot') (Point right' top')) = bbox x
+        (left, bot, right, top) = (left' - padding, bot' - padding, right' + padding, top' + padding)
+        padding = 5
