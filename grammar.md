@@ -5,7 +5,11 @@ to SVG.
 
 ## GRAMMAR
 
-    Drawing ::= Exprs
+    Drawing ::= Stms
+    
+    Stms ::= Stm Stms | ε
+    Stm ::= varname '=' Block
+          | Expr
     
     Expr     ::= Transform | Shape
     Exprs    ::= Expr Exprs | ε
@@ -13,7 +17,7 @@ to SVG.
     Tranform ::= 'translate' Pos  Block
                | 'rotate'    real Block
     
-    Block ::= '{' Exprs '}'
+    Block ::= '{' Exprs '}' | varname
     
     Shape  ::= Circle
              | Dot
